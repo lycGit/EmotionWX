@@ -4,6 +4,7 @@ import pymysql
 from flask import jsonify
 import json
 
+from utils import emotion_db_manager
 
 app = Flask(__name__, static_url_path='/s', static_folder='static_files')
 app.config.from_pyfile('./config/setting.py')
@@ -29,6 +30,8 @@ app.register_blueprint(my_bp, url_prefix='/my')
 # 以上暂时废弃
 
 #emotion_db_manager.get_chat_detail_by_superID('44', 3, 20)
+# emotion_db_manager.init_chat_detail_table()
+# emotion_db_manager.init_love_lesson_table()
 def connect_database():
     conn = pymysql.connect(host="localhost", port=3306, user='root', password='1', database='emotionwx',charset='utf8')
     return conn
