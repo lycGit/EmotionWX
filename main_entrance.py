@@ -1,8 +1,14 @@
+import requests
 from flask import Flask
 
 import pymysql
 from flask import jsonify
+from flask import Flask, redirect, request, url_for
 import json
+import weixin
+from weixin.pay import WeixinPay, WeixinPayError
+from weixin.login import WeixinLogin
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__, static_url_path='/s', static_folder='static_files')
@@ -66,6 +72,89 @@ def getIdlist():
 @app.route('/')
 def entrance():
     return app.config['SECRET_KEY']
+
+
+app_id = 'wx0d2e888ad62439ce'
+app_secret = '32f27b9d55ed2af15834632db0e4708c'
+wx_login = WeixinLogin(app_id, app_secret)
+
+
+@app.route("/getopenid")
+def getopenid():
+    code = request.args.get("code")
+    # appi与secret,可以将其存入数据库中获取
+    appid = app_id
+    secret = app_secret
+    grant_type = 'authorization_code'
+    url = f'https://api.weixin.qq.com/sns/jscode2session?appid={appid}' \
+          f'&secret={secret}&js_code={code}&grant_type={grant_type}'
+    res = requests.get(url).json()
+    return res
+
+
+
+@app.route("/login")
+def login():
+    openid = request.cookies.get("openid")
+    next = request.args.get("next") or request.referrer or "/",
+    if openid:
+        return redirect(next)
+
+    callback = url_for("authorized", next=next, _external=True)
+    callback = callback.replace('http://127.0.0.1:5000', 'https://www.qgsq.space')
+    url = wx_login.authorize(callback, "snsapi_base")
+    return redirect(url)
+
+
+@app.route("/authorized")
+def authorized():
+    code = request.args.get("code")
+    if not code:
+        return "ERR_INVALID_CODE", 400
+    next = request.args.get("next", "/")
+    data = wx_login.access_token(code)
+    openid = data.openid
+    resp = redirect(next)
+    expires = datetime.now() + timedelta(days=1)
+    resp.set_cookie("openid", openid, expires=expires, secure=True, httponly=True, samesite='Lax')
+    return resp
+
+mch_id = "1630874134"
+mch_key = "abc123def456ghi789jkm123nop456qr"
+notify_url = "https://www.qgsq.space/pay/notify"
+wx_pay = WeixinPay(app_id, mch_id, mch_key, "notify_url")
+
+
+@app.route("/pay/create", methods=['POST'])
+def pay_create():
+    openid = request.form.get('openid')
+    """
+    微信JSAPI创建统一订单，并且生成参数给JS调用
+    """
+    out_trade_no = wx_pay.nonce_str
+    raw = wx_pay.jsapi(openid=openid, body=u"测试", out_trade_no=out_trade_no, total_fee=1)
+    return jsonify(raw)
+
+    # try:
+    #     out_trade_no = wx_pay.nonce_str
+    #     raw = wx_pay.jsapi(openid="openid", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
+    #     return jsonify(raw)
+    # except WeixinPayError, e:
+    #     print e.message
+    #     return e.message, 400
+
+
+@app.route("/pay/notify", methods=["POST"])
+def pay_notify():
+    """
+    微信异步通知
+    """
+    data = wx_pay.to_dict(request.data)
+    if not wx_pay.check(data):
+        return wx_pay.reply("签名验证失败", False)
+    # 处理业务逻辑
+    return wx_pay.reply("OK", True)
+
 
 
 if __name__ == '__main__':
