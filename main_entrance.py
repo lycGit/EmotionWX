@@ -1,8 +1,10 @@
 from flask import Flask
-
+import requests
 import pymysql
 from flask import jsonify
+from flask import Flask, redirect, request, url_for
 import json
+from datetime import datetime, timedelta
 
 from utils import emotion_db_manager
 
@@ -69,6 +71,182 @@ def getIdlist():
 @app.route('/')
 def entrance():
     return app.config['SECRET_KEY']
+
+
+app_id = 'wx0d2e888ad62439ce'
+app_secret = '32f27b9d55ed2af15834632db0e4708c'
+
+
+
+@app.route("/getopenid")
+def getopenid():
+    code = request.args.get("code")
+    # appi与secret,可以将其存入数据库中获取
+    appid = app_id
+    secret = app_secret
+    grant_type = 'authorization_code'
+    url = f'https://api.weixin.qq.com/sns/jscode2session?appid={appid}' \
+          f'&secret={secret}&js_code={code}&grant_type={grant_type}'
+    res = requests.get(url).json()
+    return res
+
+
+mch_id = "1630874134"
+mch_key = "abc123def456ghi789jkm123nop456qr"
+notify_url = "https://www.qgsq.space/pay/notify"
+
+
+
+import datetime
+import random
+import string
+import time
+import requests
+import xmltodict
+
+
+
+# 生成32位随机字符串
+def randomStr():
+    return ''.join(random.sample(string.ascii_letters + string.digits, 32))
+
+
+# 发送xml请求
+def send_xml_request(url, param):
+    xml = "<xml>{0}</xml>".format("".join(["<{0}>{1}</{0}>".format(k, v) for k, v in param.items()]))
+    response = requests.post(url, data=xml.encode('utf-8'))
+    msg = response.text
+    xmlmsg = xmltodict.parse(msg)
+    return xmlmsg
+
+
+#@app.route("/pay/create", methods=['POST'])
+@app.route("/pay/create")
+def pay_create():
+    openid = request.args.get('openid')
+    order_id = request.args.get('orderid')
+    # 获取发送请求的ip地址，参数字典中需要使用
+    ip = request.args.get('REMOTE_ADDR')
+    # try:
+    # 获取当前时间
+    now_time = datetime.datetime.now()
+    # 我这里在小程序端处理，传订单号的判断为之前为支付的订单，没有的表示新建订单
+    if not order_id:
+        # 根据时间生成订单号这里可自定义
+        out_trade_no = now_time.strftime('%Y%m%d%H%M%S') + str(random.randrange(1000, 9999))
+        # 数据库存储订单，根据自己的订单字段来，我这里106表示未支付
+        # order_obj = OrderTable.objects.create(
+        #     openid=openid,
+        #     order_time=now_time,
+        #     order_num=out_trade_no,
+        #     price=3,
+        #     order_status='106'
+        # )
+        # order_obj.save()
+    else:
+        out_trade_no = order_id
+
+    # 生成随机字符串
+    nonce_str = randomStr()
+    # 参数字典1存储订单信息
+    params = {
+        # 小程序的appid, 可将appid与mchid存入数据库中
+        'appid': app_id,
+        'attach': 'tes',
+        'body': 'test',
+        # 商户id
+        'mch_id': mch_id,
+        # 商品描述
+        # 'description': '',
+        # 随机32位字符串
+        'nonce_str': nonce_str,
+        # 支付成功后微信官方回复地址, 要求必须为https地址，填写你的接口地址
+        'notify_url': 'https://www.qgsq.space/pay/notify',
+        # 用户标识
+        "openid": openid,
+        # 商户订单号
+        'out_trade_no': out_trade_no,
+        'spbill_create_ip': ip,
+        # "amount": {"total": 1, "currency": "CNY"},
+        # 订单总金额，单位fen，我这里定义了3元
+        "total_fee": '1',
+        # "payer": {"openid": openid},
+        # 交易类型
+        'trade_type': 'JSAPI',
+    }
+    # 签名(md5加密params)，MCHKEY为商户2级key
+    temp = "&".join(
+        ["{0}={1}".format(k, params[k]) for k in sorted(params)] + ["{0}={1}".format("key", mch_key, ), ]
+    )
+    h1 = hashlib.md5()
+    h1.update(temp.encode(encoding='utf8'))
+    sign = h1.hexdigest().upper()
+    # 将密文存入params
+    params['sign'] = sign
+    # 支付访问微信
+    url = "https://api.mch.weixin.qq.com/pay/unifiedorder"
+    # url = "https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi"
+    # 发送xml请求
+    xmlmsg = send_xml_request(url, params)
+    # 请求成功
+    if xmlmsg['xml']['return_code'] == 'SUCCESS':
+        prepay_id = xmlmsg['xml']['prepay_id']
+        timeStamp = str(int(time.time()))
+        # 再次签名，生成参数字典2
+        data = {
+            'appId': app_id,
+            'nonceStr': nonce_str,
+            'package': 'prepay_id=' + prepay_id,
+            'signType': 'MD5',
+            'timeStamp': timeStamp,
+        }
+        # 签名，MCHKEY为商户2级key
+        temp = "&".join(
+            ["{0}={1}".format(k, data[k]) for k in sorted(data)] + [
+                "{0}={1}".format("key", mch_key, ), ]
+        )
+        h2 = hashlib.md5()
+        h2.update(temp.encode(encoding='utf8'))
+        paySign = h2.hexdigest().upper()
+        data['paySign'] = paySign
+        return jsonify({'data': data, 'code': 200})
+    #     else:
+    #         return jsonify({'code': 400})
+    # except:
+    #     return jsonify({'code': 500})
+
+
+import hashlib
+from xml.etree import ElementTree as ET
+
+
+@app.route("/pay/notify", methods=["POST"])
+def pay_notify():
+    """
+    微信异步通知
+    """
+    # 1.获取结果吧XML转换为字典格式
+    root = ET.XML(requests.body.decode('utf-8'))
+    result = {child.tag: child.text for child in root}
+
+    # 校验签名是否正确防止恶意请求
+    sign = result.pop('sign')
+    temp = "&".join(
+        ["{0}={1}".format(k, result[k]) for k in sorted(result)] + [
+            "{0}={1}".format("key", mch_key, ), ]
+    )
+    h1 = hashlib.md5()
+    h1.update(temp.encode(encoding='utf8'))
+    local_sign = h1.hexdigest().upper()
+    # 签名一致
+    if local_sign == sign:
+        # 根据订单号修改订单状态
+        out_trade_no = result.get('out_trade_no')
+        # order_obj = OrderTable.objects.filter(order_num=out_trade_no)
+        # order_obj.update(order_status='103')
+        response = """<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"""
+        return response
+
 
 
 if __name__ == '__main__':
