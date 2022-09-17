@@ -14,7 +14,7 @@ class SingleDB(object):
         return cls._instance
 
     def __init__(self):
-        self.conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='1', db='emotionwx',charset='utf8')
+        self.conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='Lyc198901', db='emotionwx',charset='utf8')
 
 # 创建数据库游标
 def connect_database():
@@ -182,6 +182,7 @@ def init_chat_detail_table():
 def get_chat_detail(categary, page, pageSize):
     index = (page - 1) * pageSize
     sql = """select * from chat_detail_table where categary = '{}' order by id desc limit {},{};""".format(categary, index, pageSize)
+#    sql = """select * from chat_detail_table where superID = '{}' order by id desc;""".format(superID)
     print(sql)
     conn = SingleDB().conn
     cursor = conn.cursor()
