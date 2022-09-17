@@ -160,7 +160,11 @@ def get_talkskill():
 @speak_skill_bp.route('/chatdetail', methods=['POST'])
 def post_chat_detail():
    categary = request.form.get('categary')
-   res = emotion_db_manager.get_chat_detail(categary, 1, 20)
+   pageNO = request.form.get('pageNO')
+   pageSize = request.form.get('pageSize')
+   pageNO = int(pageNO)
+   pageSize = int(pageSize)
+   res = emotion_db_manager.get_chat_detail(categary, pageNO, pageSize)
    list = []
    for item in res:
        list.append(item[4])
