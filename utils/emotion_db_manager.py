@@ -141,6 +141,18 @@ def create_love_lesson_table():
     """
     excute_sql(sql)
 
+def create_love_lesson_title_table():
+    sql = """
+    CREATE TABLE IF NOT EXISTS love_lesson_title_table  (
+    id bigint(20) primary key auto_increment COMMENT '恋爱课程标题ID',
+    artid bigint(20)  NOT NULL COMMENT '文章ID',
+    title varchar(255)  NOT NULL COMMENT '标题',
+    date varchar(255)  NOT NULL COMMENT '日期',
+    is_delete tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0 否 1 是'
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='恋爱课程标题';
+    """
+    excute_sql(sql)
+
 
 def init_chat_detail_table():
     create_chat_detail_table()
@@ -211,7 +223,27 @@ def init_love_lesson_table():
                     sys.exit('file %s, line %d: %s' % (namestr, reader.line_num, e))
 
 
-
+def init_love_lesson_title_table():
+    create_love_lesson_title_table()
+    path1 = '/Users/liuyangcheng/Desktop/LearnClass/WXProgram/Service/EmotionWX/spider/mitmdump_crawl/恋爱课程标题'
+    list = os.listdir(path1)
+    for name in list:
+        namestr = name.replace('.csv', '')
+        path2 = path1 + '/' + name
+        if path2.endswith('csv'):
+            with open(path2, "r", newline='', encoding=u'utf-8', errors='ignore') as f:
+                reader = csv.DictReader(f, fieldnames=['artid', 'title', 'date'])
+                try:
+                    for row in reader:
+                        artid = row['artid']
+                        title = row['title']
+                        date = row['date']
+                        sql = """insert into love_lesson_title_table(artid,title,date) VALUES('{}', '{}', '{}');""".format(
+                            artid, title, date)
+                        print(sql)
+                        excute_sql(sql)
+                except (csv.Error) as e:
+                    sys.exit('file %s, line %d: %s' % (namestr, reader.line_num, e))
 
 
 
