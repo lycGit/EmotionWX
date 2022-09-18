@@ -134,8 +134,11 @@ def create_love_lesson_table():
     sql = """
     CREATE TABLE IF NOT EXISTS love_lesson_table  (
     id bigint(20) primary key auto_increment COMMENT '恋爱课程详情ID',
-    categary varchar(255)  NOT NULL COMMENT '话术子类目',
+    artid bigint(20)  NOT NULL COMMENT '文章ID',
+    categary bigint(20)  NOT NULL COMMENT '话术子类目ID',
+    categaryname varchar(255)  NOT NULL COMMENT '话术子类目名称',
     content text  NOT NULL COMMENT '话题详情内容',
+    imgurl varchar(255)  NOT NULL COMMENT '图片URL',
     is_delete tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0 否 1 是'
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='恋爱课程详情表';
     """
@@ -216,6 +219,16 @@ def get_love_lesson_title_table(page, pageSize):
     return res
 
 
+def get_love_lesson_detail(artid):
+    sql = """select * from love_lesson_table where artid = {};""".format(artid)
+    print(sql)
+    conn = SingleDB().conn
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    res = cursor.fetchall()
+    return res
+
+
 def init_love_lesson_table():
     create_love_lesson_table()
     path1 = '/Users/liuyangcheng/Desktop/LearnClass/EmotionWX/spider/mitmdump_crawl/恋爱课程'
@@ -225,14 +238,18 @@ def init_love_lesson_table():
         path2 = path1 + '/' + name
         if path2.endswith('csv'):
             with open(path2, "r", newline='', encoding=u'utf-8', errors='ignore') as f:
-                reader = csv.DictReader(f, fieldnames=['content_id', 'vip_des', 'content'])
+                reader = csv.DictReader(f, fieldnames=['artid', 'vip_des', 'content', 'categary', 'imgurl'])
                 try:
                     for row in reader:
                        content = row['content']
-                       sql = """insert into love_lesson_table(categary,content) VALUES('{}', '{}');""".format(namestr, content)
+                       artid = row['artid']
+                       categary = row['categary']
+                       imgurl = row['imgurl']
+                       sql = """insert into love_lesson_table(categaryname,content,artid,categary,imgurl) VALUES('{}', '{}', '{}', '{}', '{}');""".format(namestr, content, artid, categary, imgurl)
                        excute_sql(sql)
                 except (csv.Error) as e:
                     sys.exit('file %s, line %d: %s' % (namestr, reader.line_num, e))
+
 
 
 def init_love_lesson_title_table():

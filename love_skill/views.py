@@ -1,7 +1,11 @@
+#coding:utf-8
+import os
+
 from . import love_skill_bp
 from flask import request, jsonify
 from utils import  emotion_db_manager
 import json
+import webbrowser
 
 
 @love_skill_bp.route('/loveskill', methods=['POST'])
@@ -22,3 +26,40 @@ def get_love_skill():
     return jsonify(list)
 
 
+# 恋爱蜜语
+@love_skill_bp.route('/skilldetail')
+def get_skilldetail():
+    artid = request.args.get('artid')
+    # 命名生成的html
+    project_path = os.path.abspath(os.path.dirname(__file__))
+    file_list_path = project_path + "/html/"
+    file_path = str(artid) + ".html"
+    GEN_HTML = file_list_path + file_path
+    if os.access(GEN_HTML, os.F_OK):
+        return file_path
+    else:
+        print('has excute')
+
+        # 打开文件，准备写入
+        f = open(GEN_HTML, 'w')
+        res = emotion_db_manager.get_love_lesson_detail(int(artid))
+        # 准备相关变量
+        # 写入HTML界面中
+        message = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Title</title>
+        </head>
+        <body>
+           %s
+        </body>
+        </html>
+        """ % (res[0][4])
+        print(GEN_HTML)
+        # 写入文件
+        f.write(message)
+        # 关闭文件
+        f.close()
+        return file_path
