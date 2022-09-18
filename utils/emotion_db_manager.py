@@ -205,6 +205,17 @@ def get_chat_detail_by_superID(superID, page, pageSize):
     return res
 
 
+def get_love_lesson_title_table(page, pageSize):
+    index = (page - 1) * pageSize
+    sql = """select * from love_lesson_title_table order by artid desc limit {},{};""".format(index, pageSize)
+    print(sql)
+    conn = SingleDB().conn
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    res = cursor.fetchall()
+    return res
+
+
 def init_love_lesson_table():
     create_love_lesson_table()
     path1 = '/Users/liuyangcheng/Desktop/LearnClass/EmotionWX/spider/mitmdump_crawl/恋爱课程'
