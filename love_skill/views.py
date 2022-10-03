@@ -49,14 +49,14 @@ def get_skill_html_detail():
     project_path = os.path.abspath(".")
 
     file_path = str(artid) + ".html"
-    GEN_HTML = project_path + '/static_files/' + file_path
-    # print(GEN_HTML)
+    # GEN_HTML = project_path + '/static_files/' + file_path
+    GEN_HTML = project_path + '/main/static_files/' + file_path
+    print(GEN_HTML)
     if os.access(GEN_HTML, os.F_OK):
         # 发送文件
         # return send_file('love_skill/html/1698.html', GEN_HTML)
         # redirectUrl = 'http://127.0.0.1:5000/source/' + file_path
         redirectUrl = 'https://www.qgsq.space/source/' + file_path
-        # print(redirectUrl)
         return redirect(redirectUrl)
     else:
         print('has excute')
@@ -71,19 +71,18 @@ def get_skill_html_detail():
         <html lang="en">
         <head>
             <meta charset="UTF-8">
-            <title>Title</title>
+            <title> %s </title>
         </head>
         <body>
            %s
         </body>
         </html>
-        """ % (res[0][4])
-        print(GEN_HTML)
+        """ % (res[0][3], res[0][4])
+        print(res)
         # 写入文件
         f.write(message)
         # 关闭文件
         f.close()
         # redirectUrl = 'http://127.0.0.1:5000/source/' + file_path
         redirectUrl = 'https://www.qgsq.space/source/' + file_path
-        # print(redirectUrl)
         return redirect(redirectUrl)
