@@ -194,6 +194,17 @@ def get_chat_detail(categary, page, pageSize):
     return res
 
 
+def get_search_chat_detail(word, page, pageSize):
+    index = (page - 1) * pageSize
+    sql = """select * from chat_detail_table where categary = '{}' order by id desc limit {},{};""".format(word, index, pageSize)
+    print(sql)
+    conn = SingleDB().conn
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    res = cursor.fetchall()
+    return res
+
+
 
 def get_chat_detail_by_superID(superID, page, pageSize):
     index = (page - 1) * pageSize

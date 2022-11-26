@@ -1,6 +1,6 @@
 from . import speak_skill_bp
 from flask import request, jsonify
-from utils import  emotion_db_manager
+from utils import emotion_db_manager, es_search_manager
 import json
 
 
@@ -64,6 +64,12 @@ def get_lovetalk():
 @speak_skill_bp.route('/apointment')
 def get_apointment():
     return 'apointment'
+
+# 约会
+@speak_skill_bp.route('/search')
+def search_chat_content():
+    word = request.args.get('word')
+    return es_search_manager.serch_chat_word(word)
 
 
 # 通过频道获取不停类型的话术
@@ -159,12 +165,27 @@ def get_talkskill():
 
 @speak_skill_bp.route('/chatdetail', methods=['POST'])
 def post_chat_detail():
-   categary = request.form.get('categary')
-   pageNO = request.form.get('pageNO')
-   pageSize = request.form.get('pageSize')
+   categary = request.args.get('categary')
+   pageNO = request.args.get('pageNO')
+   pageSize = request.args.get('pageSize')
    pageNO = int(pageNO)
    pageSize = int(pageSize)
    res = emotion_db_manager.get_chat_detail(categary, pageNO, pageSize)
+   list = []
+   for item in res:
+       list.append(item[4])
+   return jsonify(list)
+
+
+@speak_skill_bp.route('/seachchatdetail', methods=['POST'])
+def post_search_chat_detail():
+   word = request.args.get('word')
+   pageNO = request.args.get('pageNO')
+   pageSize = request.args.get('pageSize')
+   print(word)
+   pageNO = int(pageNO)
+   pageSize = int(pageSize)
+   res = emotion_db_manager.get_chat_detail(word, pageNO, pageSize)
    list = []
    for item in res:
        list.append(item[4])
