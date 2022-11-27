@@ -165,9 +165,9 @@ def get_talkskill():
 
 @speak_skill_bp.route('/chatdetail', methods=['POST'])
 def post_chat_detail():
-   categary = request.args.get('categary')
-   pageNO = request.args.get('pageNO')
-   pageSize = request.args.get('pageSize')
+   categary = request.form.get('categary')
+   pageNO = request.form.get('pageNO')
+   pageSize = request.form.get('pageSize')
    pageNO = int(pageNO)
    pageSize = int(pageSize)
    res = emotion_db_manager.get_chat_detail(categary, pageNO, pageSize)
@@ -179,9 +179,9 @@ def post_chat_detail():
 
 @speak_skill_bp.route('/seachchatdetail', methods=['POST'])
 def post_search_chat_detail():
-   word = request.args.get('word')
-   pageNO = request.args.get('pageNO')
-   pageSize = request.args.get('pageSize')
+   word = request.form.get('word')
+   pageNO = request.form.get('pageNO')
+   pageSize = request.form.get('pageSize')
    print(word)
    pageNO = int(pageNO)
    pageSize = int(pageSize)
