@@ -40,5 +40,6 @@ def serch_chat_word(word):
             }
         }
     }
-    ret = SingleES().es.search(index='emotionwx', doc_type='_doc', body=query)
+    # 本地mac 电脑上的索引是_doc, 阿里云服务器上的索引是chat_detail_table
+    ret = SingleES().es.search(index='emotionwx', doc_type='chat_detail_table', body=query)
     return jsonify(ret)
