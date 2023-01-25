@@ -51,7 +51,7 @@ def get_pricelist():
     pricelist = [
         {
             "name": '7天会员',
-            "price": '18.8元',
+            "price": '0.01元',
             "oldprice": '58.8元'
         },
         {
@@ -148,3 +148,25 @@ def get_wxnikename():
         "歌满长安"
     ]
     return nikenames
+
+
+@my_bp.route('/profilelist')
+def get_profilelist():
+    profilelist = [
+        {
+            "icon": 'tianxiejihuoma.png',
+            "title": '激活码解锁',
+            "discribe": '微信号码：Anyinchashe'
+        },
+        {
+            "icon": 'aichat.png',
+            "title": '投诉建议',
+            "discribe": '微信号码：Anyinchashe'
+        },
+        {
+            "icon": 'lianxikefu.png',
+            "title": '联系客服',
+            "discribe": '微信号码：Anyinchashe'
+        }
+    ]
+    return jsonify(profilelist)
