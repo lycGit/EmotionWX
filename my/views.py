@@ -51,17 +51,17 @@ def get_pricelist():
     pricelist = [
         {
             "name": '7天会员',
-            "price": '0.01元',
+            "price": '18.8元',
             "oldprice": '58.8元'
         },
         {
             "name": '年卡会员',
-            "price": '58.8元',
+            "price": '38.8元',
             "oldprice": '298.8元'
         },
         {
             "name": '终身会员',
-            "price": '98.8元',
+            "price": '68.8元',
             "oldprice": '488.8元'
         }
     ]
