@@ -126,6 +126,7 @@ def send_xml_request(url, param):
 def pay_create():
     openid = request.args.get('openid')
     order_id = request.args.get('orderid')
+    price = request.args.get('price')
     # 获取发送请求的ip地址，参数字典中需要使用
     ip = request.args.get('REMOTE_ADDR')
     # try:
@@ -147,6 +148,10 @@ def pay_create():
     else:
         out_trade_no = order_id
 
+    price = price.replace('元', '')
+    price = float(price)
+    price = int(price * 100)
+    price = str(price)
     # 生成随机字符串
     nonce_str = randomStr()
     # 参数字典1存储订单信息
@@ -170,7 +175,7 @@ def pay_create():
         'spbill_create_ip': ip,
         # "amount": {"total": 1, "currency": "CNY"},
         # 订单总金额，单位fen，我这里定义了3元
-        "total_fee": '1',
+        "total_fee": price,
         # "payer": {"openid": openid},
         # 交易类型
         'trade_type': 'JSAPI',
