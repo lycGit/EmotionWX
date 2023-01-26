@@ -84,5 +84,5 @@ def get_skill_html_detail():
         # 关闭文件
         f.close()
         # redirectUrl = 'http://127.0.0.1:5000/source/' + file_path
-        redirectUrl = 'https://www.qgsq.space/source/' + file_path
+        redirectUrl = 'https://www.qgsq.space/' + file_path
         return redirect(redirectUrl)
