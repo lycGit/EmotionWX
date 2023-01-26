@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 
 from utils import emotion_db_manager
 
-app = Flask(__name__, static_url_path='/source', static_folder='main/static_files')
+# app = Flask(__name__, static_url_path='/source', static_folder='main/static_files')
+app = Flask(__name__, static_url_path='', static_folder='main/static_files')
 app.config.from_pyfile('./config/setting.py')
 
 from speak_skill import speak_skill_bp
