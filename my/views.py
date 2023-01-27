@@ -155,8 +155,8 @@ def get_profilelist():
     profilelist = [
         {
             "icon": 'tianxiejihuoma.png',
-            "title": '激活码解锁',
-            "discribe": '微信号码：Anyinchashe'
+            "title": '版本',
+            "discribe": '1.0.1'
         },
         {
             "icon": 'aichat.png',
