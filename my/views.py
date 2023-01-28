@@ -5,7 +5,6 @@ from flask import jsonify
 import random
 
 
-
 # 填写激活码
 @my_bp.route('/activecode', methods=['POST'])
 def post_activeCode():
@@ -170,3 +169,15 @@ def get_profilelist():
         }
     ]
     return jsonify(profilelist)
+
+
+# 恋爱蜜语
+@my_bp.route('/validversion')
+def get_validversion():
+    return "1.0.4"
+    # version = request.args.get('version')
+    # print(version)
+    # if int(version) > 1:
+    #     return 'True'
+    # else:
+    #     return "False"
