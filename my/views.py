@@ -174,7 +174,7 @@ def get_profilelist():
 # 恋爱蜜语
 @my_bp.route('/validversion')
 def get_validversion():
-    return "1.0.4"
+    return "1.0.5"
     # version = request.args.get('version')
     # print(version)
     # if int(version) > 1:
