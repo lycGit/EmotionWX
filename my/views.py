@@ -160,12 +160,12 @@ def get_profilelist():
         {
             "icon": 'aichat.png',
             "title": '投诉建议',
-            "discribe": '微信号码：Anyinchashe'
+            "discribe": '微信号码：充会员可获取'
         },
         {
             "icon": 'lianxikefu.png',
             "title": '联系客服',
-            "discribe": '微信号码：Anyinchashe'
+            "discribe": '微信号码：充会员可获取'
         }
     ]
     return jsonify(profilelist)
